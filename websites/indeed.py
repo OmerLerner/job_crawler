@@ -3,18 +3,25 @@ import urllib
 
 import requests
 from bs4 import BeautifulSoup
-import selenium
-from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
+# import selenium
+# from selenium import webdriver
+# from selenium.webdriver.support.ui import WebDriverWait
 import pandas as pd
 import os
 
 JOBS_PER_PAGE = 15
 
+extracted_data = []
+
+titles = []
+companies = []
+links = []
+relevant_keyword = []
+
 
 def parse_page_count(element):
     pages_element = element.text.split()
-    return int(pages_element[3])
+    return math.ceil(int(pages_element[3]) / JOBS_PER_PAGE)
 
 
 # https://il.indeed.com /jobs?q=student&l=israel
@@ -73,13 +80,32 @@ def is_relevant(job_url, keywords):
     soup = BeautifulSoup(page.content, "html.parser")
     # job_description = soup.find(id="jobDescriptionText")
 
-    return_value = False
+    key = ""
     for keyword in keywords:
         if keyword in soup.text.lower():
-            return_value = True
-            break
+            return keyword
 
-    return return_value
+    return key
+
+
+def add_job(job, keyword, job_link):
+    """
+
+    :param job: Job element that is being parsed
+    :param keyword: String - Keyword that is found in description, otherwise "Timeout"
+    :return: void - appends each value to it's relevant column
+    """
+    titles.append(parse_job_title(job))
+    companies.append(parse_job_company(job))
+    links.append(job_link)
+    relevant_keyword.append(keyword)
+
+
+def create_table():
+    extracted_data.append(titles)
+    extracted_data.append(companies)
+    extracted_data.append(links)
+    extracted_data.append(relevant_keyword)
 
 
 # Indeed has 15 posting per page
@@ -95,47 +121,40 @@ def extract_jobs(job_title, location, days, keywords):
 
     page_number = 0
 
-    job_soup, job_count = load_jobs(job_title, location, days, page_number)
-    page_count = math.ceil(job_count / JOBS_PER_PAGE)
-    job_elements = job_soup.find_all('div', class_='cardOutline')
+    job_soup, page_count = load_jobs(job_title, location, days, page_number)
+    jobs_list = job_soup.find_all('div', class_='cardOutline')
 
-    columns = ['titles', 'companies', 'links']
-
-    extracted_data = []
-    titles = []
-    companies = []
-    links = []
+    columns = ['Job Title', 'Company', 'Job Link', 'Relevant Keyword']
 
     print("Indeed - Parsing page 1 out of " + str(page_count))
-    for job_element in job_elements:
-        job_link = parse_job_link(job_element)
-        if is_relevant(job_link, keywords):
-            titles.append(parse_job_title(job_element))
-            companies.append(parse_job_company(job_element))
-            links.append(job_link)
+    for job in jobs_list:
+        job_link = parse_job_link(job)
+        keyword = is_relevant(job_link, keywords)
+        if keyword:
+            add_job(job, job_link, keyword)
 
     for i in range(1, page_count):
         print("Indeed - Parsing page " + str(i + 1) + " out of " + str(page_count))
         page_number += 10
-        job_soup, job_count = load_jobs(job_title, location, days, page_number)
-        job_elements = job_soup.find_all('div', class_='cardOutline')
-        for job_element in job_elements:
-            job_link = parse_job_link(job_element)
-            if is_relevant(job_link, keywords):
-                titles.append(parse_job_title(job_element))
-                companies.append(parse_job_company(job_element))
-                links.append(job_link)
+        job_soup, page_count = load_jobs(job_title, location, days, page_number)
+        jobs_list = job_soup.find_all('div', class_='cardOutline')
+        for job in jobs_list:
+            job_link = parse_job_link(job)
+            keyword = is_relevant(job_link, keywords)
+            if keyword:
+                add_job(job, job_link, keyword)
 
-    extracted_data.append(titles)
-    extracted_data.append(companies)
-    extracted_data.append(links)
+    if len(titles) == 0:
+        print("Indeed - No jobs with the selected keywords were found.")
+    else:
 
-    jobs_list = {}
-    print("Indeed - Done parsing, formatting data to CSV...")
-    for i in range(len(columns)):
-        jobs_list[columns[i]] = extracted_data[i]
+        create_table()
+        jobs_list = {}
 
-    jobs = pd.DataFrame(jobs_list)
-    jobs.to_csv("results-indeed.csv")
+        print("Indeed - Done parsing, formatting data to CSV...")
+        for i in range(len(columns)):
+            jobs_list[columns[i]] = extracted_data[i]
 
-    print("Indeed - Done! Results saved into results_indeed.csv")
+        jobs = pd.DataFrame(jobs_list)
+        jobs.to_csv("results-indeed.csv")
+        print("Indeed - Done! Results saved into results_indeed.csv")

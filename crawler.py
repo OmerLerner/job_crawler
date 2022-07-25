@@ -1,19 +1,20 @@
 import urllib
 import requests
 from bs4 import BeautifulSoup
-import selenium
-from selenium import webdriver
-from selenium.webdriver.support.ui import WebDriverWait
+# import selenium
+# from selenium import webdriver
+# from selenium.webdriver.support.ui import WebDriverWait
 import pandas as pd
 import os
 
-from websites import indeed
+from websites import indeed, linkedin
 
 
 def main():
-    keywords = ["Python","Java", "Javascript", "OOP", "C", "C++", "Computer Science",
-                "Software Engineer"]
-    indeed.extract_jobs("Student", "Israel", 14, keywords)
+    keywords = ['python','java','computer science','javascript','software engineer']
+    indeed.extract_jobs("Student", "Israel", 1, keywords)
+    linkedin.extract_jobs("Student", "Israel", 1, keywords)
+    print("Job search complete!")
 
 
 if __name__ == '__main__':
