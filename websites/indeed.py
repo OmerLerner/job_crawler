@@ -1,21 +1,21 @@
 import math
-import urllib
 
 import requests
 from bs4 import BeautifulSoup
-# import selenium
-# from selenium import webdriver
-# from selenium.webdriver.support.ui import WebDriverWait
+
 import pandas as pd
-import os
 
 JOBS_PER_PAGE = 15
+
+COLUMN_INDEX = ['A', 'B', 'C', 'D', 'E', 'F']
+COLUMNS = ['Job Title', 'Company', 'Location','Relevant Keyword', 'Job Link']
 
 extracted_data = []
 
 titles = []
 companies = []
 links = []
+locations = []
 relevant_keyword = []
 
 
@@ -65,6 +65,14 @@ def parse_job_company(element):
         company = ""
     return company
 
+def parse_job_location(element):
+    try:
+        location_element = element.find(class_='companyLocation')
+        location = location_element.text.strip()
+    except:
+        location = ""
+    return location
+
 
 def parse_job_link(element):
     try:
@@ -93,19 +101,45 @@ def add_job(job, keyword, job_link):
 
     :param job: Job element that is being parsed
     :param keyword: String - Keyword that is found in description, otherwise "Timeout"
+    :param keyword: String - Parsed job link
     :return: void - appends each value to it's relevant column
     """
     titles.append(parse_job_title(job))
     companies.append(parse_job_company(job))
-    links.append(job_link)
+    locations.append(parse_job_location(job))
     relevant_keyword.append(keyword)
+    links.append(job_link)
 
 
 def create_table():
     extracted_data.append(titles)
     extracted_data.append(companies)
-    extracted_data.append(links)
+    extracted_data.append(locations)
     extracted_data.append(relevant_keyword)
+    extracted_data.append(links)
+
+    jobs_list = {}
+
+    print("Indeed - Done parsing, formatting data to XLSX...")
+    for i in range(len(COLUMNS)):
+        jobs_list[COLUMNS[i]] = extracted_data[i]
+
+    df = pd.DataFrame(jobs_list)
+
+    writer = pd.ExcelWriter('results-indeed.xlsx')
+    df.to_excel(writer, sheet_name='Indeed Jobs', index=False, na_rep='NaN')
+
+    for column in df:
+        column_width = max(df[column].astype(str).map(len).max(), len(column))
+        col_index = df.columns.get_loc(column)
+        if COLUMNS[col_index] == 'Job Link':
+            writer.sheets['Indeed Jobs'].set_column(col_index, col_index, column_width)
+        else:
+            writer.sheets['Indeed Jobs'].set_column(col_index, col_index, column_width + 5)
+
+    writer.save()
+
+    print("Indeed - Done! Results saved into results-indeed.xlsx")
 
 
 # Indeed has 15 posting per page
@@ -116,7 +150,7 @@ def extract_jobs(job_title, location, days, keywords):
     :param location: Location of job
     :param days: Posted in last x days
     :param keywords: Filter jobs that have these keywords in the title/description
-    :return: csv file of jobs that fit the criteria
+    :return: xlsx file of jobs that fit the criteria
     """
 
     page_number = 0
@@ -124,14 +158,12 @@ def extract_jobs(job_title, location, days, keywords):
     job_soup, page_count = load_jobs(job_title, location, days, page_number)
     jobs_list = job_soup.find_all('div', class_='cardOutline')
 
-    columns = ['Job Title', 'Company', 'Job Link', 'Relevant Keyword']
-
     print("Indeed - Parsing page 1 out of " + str(page_count))
     for job in jobs_list:
         job_link = parse_job_link(job)
         keyword = is_relevant(job_link, keywords)
         if keyword:
-            add_job(job, job_link, keyword)
+            add_job(job, keyword, job_link)
 
     for i in range(1, page_count):
         print("Indeed - Parsing page " + str(i + 1) + " out of " + str(page_count))
@@ -142,19 +174,10 @@ def extract_jobs(job_title, location, days, keywords):
             job_link = parse_job_link(job)
             keyword = is_relevant(job_link, keywords)
             if keyword:
-                add_job(job, job_link, keyword)
+                add_job(job, keyword, job_link)
 
     if len(titles) == 0:
         print("Indeed - No jobs with the selected keywords were found.")
     else:
-
         create_table()
-        jobs_list = {}
 
-        print("Indeed - Done parsing, formatting data to CSV...")
-        for i in range(len(columns)):
-            jobs_list[columns[i]] = extracted_data[i]
-
-        jobs = pd.DataFrame(jobs_list)
-        jobs.to_csv("results-indeed.csv")
-        print("Indeed - Done! Results saved into results_indeed.csv")
