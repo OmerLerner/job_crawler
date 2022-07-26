@@ -1,10 +1,14 @@
+from abc import abstractmethod
+import pandas as pd
+
 class Parser:
     def __init__(self,job_title,location,range,keywords):
+        self.website_name = ""
         self.job_title = job_title
         self.location = location
-        self.range = range
+        self.range = int(range)
         self.keywords = keywords
-        self.jobs_per_page = 25
+        self.JOBS_PER_PAGE = 0
         self.COLUMN_INDEX = ['A', 'B', 'C', 'D', 'E', 'F']
         self.COLUMNS = ['Job Title', 'Company', 'Location', 'Relevant Keyword', 'Job Link']
 
@@ -37,3 +41,34 @@ class Parser:
         self.links.append(self.parse_job_link(job))
         self.locations.append(self.parse_job_location(job))
         self.relevant_keyword.append(keyword)
+
+    def create_table(self):
+
+        self.extracted_data.append(self.titles)
+        self.extracted_data.append(self.companies)
+        self.extracted_data.append(self.locations)
+        self.extracted_data.append(self.relevant_keyword)
+        self.extracted_data.append(self.links)
+
+        jobs_list = {}
+
+        print("Linkedin - Done parsing, formatting data to XLSX...")
+        for i in range(len(self.COLUMNS)):
+            jobs_list[self.COLUMNS[i]] = self.extracted_data[i]
+
+        df = pd.DataFrame(jobs_list)
+
+        writer = pd.ExcelWriter('results-'+self.website_name.lower()+'.xlsx')
+        df.to_excel(writer, sheet_name=self.website_name+' Jobs', index=False, na_rep='NaN')
+
+        for column in df:
+            column_width = max(df[column].astype(str).map(len).max(), len(column))
+            col_index = df.columns.get_loc(column)
+            if self.COLUMNS[col_index] == 'Job Link':
+                writer.sheets[self.website_name+' Jobs'].set_column(col_index, col_index, column_width)
+            else:
+                writer.sheets[self.website_name+' Jobs'].set_column(col_index, col_index, column_width + 5)
+
+        writer.save()
+
+        print(self.website_name+" - Done! Results saved into results-"+self.website_name.lower()+".xlsx")

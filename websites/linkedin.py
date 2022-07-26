@@ -5,228 +5,169 @@ from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
-import pandas as pd
+
+from websites.parser import Parser
 
 
-JOBS_PER_PAGE = 25
-
-COLUMN_INDEX = ['A', 'B', 'C', 'D', 'E', 'F']
-COLUMNS = ['Job Title', 'Company','Location', 'Relevant Keyword', 'Job Link']
-
-extracted_data = []
-titles = []
-companies = []
-locations = []
-links = []
-relevant_keyword = []
+class Linkedin_parser(Parser):
+    def __init__(self, job_title, location, range, keywords):
+        super().__init__(job_title, location, range, keywords)
+        self.website_name = "Linkedin"
+        self.JOBS_PER_PAGE = 25
 
 
-def parse_page_count(element, days_range):
-    labels = element.select("label")
-    if days_range <= 1:
-        value = labels[0].text
-    elif days_range <= 7:
-        value = labels[1].text
-    elif days_range <= 31:
-        value = labels[2].text
-    else:
-        value = labels[3].text
-    return int(value[value.find('(') + 1:value.find(')')])
-
-
-def generate_range(days):
-    if days == 1:
-        return "f_TPR=r86400&"
-    elif days <= 7:
-        return "f_TPR=r604800&"
-    elif days <= 31:
-        return "f_TPR=r2592000&"
-    return ""
-
-
-def generate_job_title_string(job_title):
-    keywords = job_title.split()
-    if len(keywords) < 2:
-        return job_title
-    formatted_title = ""
-    for i in range(len(keywords) - 1):
-        formatted_title += keywords[i] + "%20"
-    return formatted_title + keywords[-1]
-
-
-def add_job(job, keyword):
-    """
-
-    :param job: Job element that is being parsed
-    :param keyword: String - Keyword that is found in description, otherwise "Timeout"
-    :return: void - appends each value to it's relevant column
-    """
-    titles.append(parse_job_title(job))
-    companies.append(parse_job_company(job))
-    links.append(parse_job_link(job))
-    locations.append(parse_job_location(job))
-    relevant_keyword.append(keyword)
-
-
-def create_table():
-
-    extracted_data.append(titles)
-    extracted_data.append(companies)
-    extracted_data.append(locations)
-    extracted_data.append(relevant_keyword)
-    extracted_data.append(links)
-
-    jobs_list = {}
-
-    print("Linkedin - Done parsing, formatting data to XLSX...")
-    for i in range(len(COLUMNS)):
-        jobs_list[COLUMNS[i]] = extracted_data[i]
-
-    df = pd.DataFrame(jobs_list)
-
-    writer = pd.ExcelWriter('results-linkedin.xlsx')
-    df.to_excel(writer, sheet_name='Linkedin Jobs', index=False, na_rep='NaN')
-
-    for column in df:
-        column_width = max(df[column].astype(str).map(len).max(), len(column))
-        col_index = df.columns.get_loc(column)
-        if COLUMNS[col_index] == 'Job Link':
-            writer.sheets['Linkedin Jobs'].set_column(col_index, col_index, column_width)
+    def parse_page_count(self,element, days_range):
+        labels = element.select("label")
+        if days_range <= 1:
+            value = labels[0].text
+        elif days_range <= 7:
+            value = labels[1].text
+        elif days_range <= 31:
+            value = labels[2].text
         else:
-            writer.sheets['Linkedin Jobs'].set_column(col_index, col_index, column_width + 5)
-
-    writer.save()
-
-    print("Linkedin - Done! Results saved into results-linkedin.xlsx")
+            value = labels[3].text
+        return int(value[value.find('(') + 1:value.find(')')])
 
 
-def generate_url(job_title, location, days_range, page_number):
-    """
-    Sends a get request, parses page and returns all of the job postings on current page
-
-    :param job_title: String - name of job to search
-    :param location: String - location of job
-    :param days_range: Int - search jobs posted in last x days
-    :param page_number: Int - current page number to load
-    :return: Page containing all jobs
-    """
-    date_posted_range = generate_range(days_range)
-    url = ('https://www.linkedin.com/jobs/search/?'
-           + date_posted_range +
-           'keywords='
-           + generate_job_title_string(job_title) +
-           '&location=' + location)
-
-    if page_number > 1:
-        url += "&start=" + str(25 * (page_number - 1))
-
-    return url
+    def generate_range(self,days):
+        if days == 1:
+            return "f_TPR=r86400&"
+        elif days <= 7:
+            return "f_TPR=r604800&"
+        elif days <= 31:
+            return "f_TPR=r2592000&"
+        return ""
 
 
-def parse_jobs_list_and_page_count(driver):
-    count = int(driver.find_element(By.CSS_SELECTOR, "h1>span").get_attribute('innerText'))
-    page_count = math.ceil(count / JOBS_PER_PAGE)
-
-    for i in range(page_count):
-        driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
-        time.sleep(1)
-    driver.execute_script("window.scrollTo(0,0)")
-
-    jobs_list = driver.find_element(By.CLASS_NAME, 'jobs-search__results-list')
-    jobs = jobs_list.find_elements(By.TAG_NAME, 'li')
-
-    return jobs, page_count
+    def generate_job_title_string(self):
+        keywords = self.job_title.split()
+        if len(keywords) < 2:
+            return self.job_title
+        formatted_title = ""
+        for i in range(len(keywords) - 1):
+            formatted_title += keywords[i] + "%20"
+        return formatted_title + keywords[-1]
 
 
-def parse_job_title(element):
-    try:
-        title = element.find_element(By.CLASS_NAME, 'base-search-card__title').text
-    except:
-        title = ""
-    return title
+    def generate_url(self):
+        """
+        Sends a get request, parses page and returns all of the job postings on current page
+
+        :param job_title: String - name of job to search
+        :param location: String - location of job
+        :param days_range: Int - search jobs posted in last x days
+        :param page_number: Int - current page number to load
+        :return: Page containing all jobs
+        """
+        date_posted_range = self.generate_range(self.range)
+        url = ('https://www.linkedin.com/jobs/search/?'
+               + date_posted_range +
+               'keywords='
+               + self.generate_job_title_string() +
+               '&location=' + self.location)
+
+        # if page_number > 1:
+        #     url += "&start=" + str(25 * (page_number - 1))
+
+        return url
 
 
-def parse_job_company(element):
-    try:
-        company = element.find_element(By.CLASS_NAME, 'base-search-card__subtitle').text
-    except:
-        company = ""
-    return company
+    def parse_jobs_list_and_page_count(self, driver):
+        count = int(driver.find_element(By.CSS_SELECTOR, "h1>span").get_attribute('innerText'))
+        page_count = math.ceil(count / self.JOBS_PER_PAGE)
 
-def parse_job_location(element):
-    try:
-        location = element.find_element(By.CLASS_NAME,'job-search-card__location').text
-    except:
-        location = ""
-    return location
+        for i in range(page_count):
+            driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
+            time.sleep(1)
+        driver.execute_script("window.scrollTo(0,0)")
 
+        jobs_list = driver.find_element(By.CLASS_NAME, 'jobs-search__results-list')
+        jobs = jobs_list.find_elements(By.TAG_NAME, 'li')
 
-def parse_job_link(element):
-    try:
-        link = element.find_element(By.CLASS_NAME, 'base-card__full-link').get_attribute('href')
-    except:
-        link = ''
-    return link
+        return jobs, page_count
 
 
-def is_relevant(job_description, keywords):
-    for keyword in keywords:
-        if keyword in job_description:
-            return keyword
-    return ""
-
-
-def make_clickable(val):
-    # target _blank to open new window
-    return '<a href="{}">{}</a>'.format(val, val)
-
-
-# Linkedin has 25 postings per page
-# Add location of job
-def extract_jobs(job_title, location, days, keywords):
-    """
-    Returns all relevant jobs that fit the given parameters
-    :param job_title: Name of job to search
-    :param location: Location of job
-    :param days: Posted in last x days
-    :param keywords: Filter jobs that have these keywords in the title/description
-    :return: xlsx file of jobs that fit the criteria
-    """
-
-    page_number = 1
-
-    url = generate_url(job_title, location, days, page_number)
-
-    driver = webdriver.Chrome()
-    driver.get(url)
-    driver.maximize_window()
-
-    jobs_list, page_count = parse_jobs_list_and_page_count(driver)
-
-    print("Linkedin - Parsing jobs...")
-
-    for job in jobs_list:
-        job.click()
-
+    def parse_job_title(self,element):
         try:
-            button = WebDriverWait(driver, 3).until(
-                EC.element_to_be_clickable((By.CLASS_NAME, "show-more-less-html__button--more")))
-            button.click()
-
-            time.sleep(0.5)
-            job_description = driver.find_element(By.CLASS_NAME, "show-more-less-html").text
-            keyword = is_relevant(job_description.lower(), keywords)
-            if keyword:
-                add_job(job, keyword)
-
+            title = element.find_element(By.CLASS_NAME, 'base-search-card__title').text
         except:
-            print("Timeout: "+parse_job_title(job)+" - Job description didn't load")
-            add_job(job, "TIMEOUT")
+            title = ""
+        return title
 
-    driver.quit()
 
-    if len(titles) == 0:
-        print("Linkedin - No jobs with the selected keywords were found.")
-    else:
-        create_table()
+    def parse_job_company(self,element):
+        try:
+            company = element.find_element(By.CLASS_NAME, 'base-search-card__subtitle').text
+        except:
+            company = ""
+        return company
+
+    def parse_job_location(self,element):
+        try:
+            location = element.find_element(By.CLASS_NAME,'job-search-card__location').text
+        except:
+            location = ""
+        return location
+
+
+    def parse_job_link(self,element):
+        try:
+            link = element.find_element(By.CLASS_NAME, 'base-card__full-link').get_attribute('href')
+        except:
+            link = ''
+        return link
+
+
+    def is_relevant(self,job_description):
+        for keyword in self.keywords:
+            if keyword in job_description:
+                return keyword
+        return ""
+
+
+
+
+    # Linkedin has 25 postings per page
+    # Add location of job
+    def extract_jobs(self):
+        """
+        Returns all relevant jobs that fit the given parameters
+        :return: xlsx file of jobs that fit the criteria
+        """
+
+
+        url = self.generate_url()
+
+        driver = webdriver.Chrome()
+        driver.get(url)
+        driver.maximize_window()
+
+        jobs_list, page_count = self.parse_jobs_list_and_page_count(driver)
+
+        print("Linkedin - Parsing jobs...")
+
+        for job in jobs_list:
+            job.click()
+
+            try:
+                button = WebDriverWait(driver, 3).until(
+                    EC.element_to_be_clickable((By.CLASS_NAME, "show-more-less-html__button--more")))
+                button.click()
+
+                time.sleep(0.5)
+                job_description = driver.find_element(By.CLASS_NAME, "show-more-less-html").text
+                keyword = self.is_relevant(job_description.lower())
+                if keyword:
+                    self.add_job(job, keyword)
+
+            except:
+                print("Timeout: "+self.parse_job_title(job)+" - Job description didn't load")
+                self.add_job(job, "TIMEOUT")
+
+        driver.quit()
+
+        if len(self.titles) == 0:
+            print("Linkedin - No jobs with the selected keywords were found.")
+        else:
+            self.create_table()
 

@@ -8,12 +8,20 @@ import pandas as pd
 import os
 
 from websites import indeed, linkedin
+from websites.indeed import Indeed_parser
+from websites.linkedin import Linkedin_parser
 
 
 def main():
-    keywords = ['python','java','computer science','javascript','software engineer']
-    indeed.extract_jobs("Student", "Israel", 1, keywords)
-    linkedin.extract_jobs("Student", "Israel", 1, keywords)
+    job_title = "Intern"
+    location = "Israel"
+    keywords = ['computer science']
+    # linkedin_parser = Linkedin_parser(job_title,location,1,keywords)
+    indeed_parser = Indeed_parser(job_title,location,3,keywords)
+
+    # linkedin_parser.extract_jobs()
+    indeed_parser.extract_jobs()
+
     print("Job search complete!")
 
 
