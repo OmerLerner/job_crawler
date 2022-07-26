@@ -1,6 +1,9 @@
 import math
+import os
 import urllib
 import time
+
+import openpyxl
 import requests
 from bs4 import BeautifulSoup
 import selenium
@@ -10,9 +13,18 @@ from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import pandas as pd
 
+from IPython.display import HTML
+from openpyxl import Workbook
+
+# pip install Jinja2
+
+import numpy as np
+
 # import os
 
 JOBS_PER_PAGE = 25
+COLUMN_INDEX = ['A', 'B', 'C', 'D', 'E', 'F']
+COLUMNS = ['Job Title', 'Company', 'Relevant Keyword', 'Job Link']
 
 extracted_data = []
 titles = []
@@ -66,16 +78,12 @@ def add_job(job, keyword):
     links.append(parse_job_link(job))
     relevant_keyword.append(keyword)
 
+
 def create_table():
     extracted_data.append(titles)
     extracted_data.append(companies)
-    extracted_data.append(links)
     extracted_data.append(relevant_keyword)
-
-
-# https://www.linkedin.com/jobs/search/?f_TPR=r86400&keywords=student&location=Israel
-# https://www.linkedin.com/jobs/search/?keywords=Data%20Scientist&location=Israel
-# https://www.linkedin.com/jobs/search/?keywords=data%20scientist&location=Israel&start=25
+    extracted_data.append(links)
 
 
 def generate_url(job_title, location, days_range, page_number):
@@ -147,7 +155,13 @@ def is_relevant(job_description, keywords):
     return ""
 
 
+def make_clickable(val):
+    # target _blank to open new window
+    return '<a href="{}">{}</a>'.format(val, val)
+
+
 # Linkedin has 25 postings per page
+# Add location of job
 def extract_jobs(job_title, location, days, keywords):
     """
     Returns all relevant jobs that fit the given parameters
@@ -167,8 +181,6 @@ def extract_jobs(job_title, location, days, keywords):
     driver.maximize_window()
 
     jobs_list, page_count = parse_jobs_list_and_page_count(driver)
-
-    columns = ['Job Title', 'Company', 'Job Link',  'Relevant Keyword']
 
     print("Linkedin - Parsing jobs...")
 
@@ -199,11 +211,24 @@ def extract_jobs(job_title, location, days, keywords):
         create_table()
         jobs_list = {}
 
-        print("Linkedin - Done parsing, formatting data to CSV...")
-        for i in range(len(columns)):
-            jobs_list[columns[i]] = extracted_data[i]
+        print("Linkedin - Done parsing, formatting data to XLSX...")
+        for i in range(len(COLUMNS)):
+            jobs_list[COLUMNS[i]] = extracted_data[i]
 
-        jobs = pd.DataFrame(jobs_list)
-        jobs.to_csv("results-linkedin.csv")
+        df = pd.DataFrame(jobs_list)
 
-        print("Linkedin - Done! Results saved into linkedin.csv")
+        writer = pd.ExcelWriter('results-linkedin.xlsx')
+        df.to_excel(writer, sheet_name='Linkedin Jobs', index=False, na_rep='NaN')
+
+        for column in df:
+            column_width = max(df[column].astype(str).map(len).max(), len(column))
+            col_index = df.columns.get_loc(column)
+            if COLUMNS[col_index] == 'Job Link':
+                writer.sheets['Linkedin Jobs'].set_column(col_index, col_index, column_width)
+            else:
+                writer.sheets['Linkedin Jobs'].set_column(col_index, col_index, column_width + 10)
+
+        writer.save()
+
+
+        print("Linkedin - Done! Results saved into results-linkedin.xlsx")
