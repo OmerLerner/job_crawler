@@ -1,28 +1,22 @@
-import urllib
-import requests
-from bs4 import BeautifulSoup
-# import selenium
-# from selenium import webdriver
-# from selenium.webdriver.support.ui import WebDriverWait
-import pandas as pd
-import os
 
-from websites import indeed, linkedin
-from websites.indeed import Indeed_parser
-from websites.linkedin import Linkedin_parser
+from websites.indeed import indeed_Parser
+from websites.linkedin import linkedin_Parser
 
 
 def main():
-    job_title = "Intern"
+    job_title = "Student"
     location = "Israel"
-    keywords = ['computer science']
-    # linkedin_parser = Linkedin_parser(job_title,location,1,keywords)
-    indeed_parser = Indeed_parser(job_title,location,3,keywords)
+    days = 1
+    keywords = ['computer science', 'python', 'javascript', 'c++', 'java']
 
-    # linkedin_parser.extract_jobs()
-    indeed_parser.extract_jobs()
+    if len(job_title) > 0 and len(location)>0:
+        linkedin_parser = linkedin_Parser(job_title,location,days,keywords)
+        indeed_parser = indeed_Parser(job_title,location,days,keywords)
 
-    print("Job search complete!")
+        linkedin_parser.extract_jobs()
+        indeed_parser.extract_jobs()
+
+        print("Job search complete!")
 
 
 if __name__ == '__main__':

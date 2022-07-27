@@ -3,12 +3,10 @@ import math
 import requests
 from bs4 import BeautifulSoup
 
-import pandas as pd
-
 from websites.parser import Parser
 
 
-class Indeed_parser(Parser):
+class indeed_Parser(Parser):
     def __init__(self, job_title, location, range, keywords):
         super().__init__(job_title, location, range, keywords)
         self.website_name = "Indeed"
@@ -61,7 +59,6 @@ class Indeed_parser(Parser):
 
         return key
 
-
     def load_jobs(self, page_number):
         """
         Sends a get request, parses page and returns all of the job postings on current page
@@ -82,14 +79,6 @@ class Indeed_parser(Parser):
 
     # Indeed has 15 posting per page
     def extract_jobs(self):
-        """
-        Returns all relevant jobs that fit the given parameters
-        :param job_title: Name of job to search
-        :param location: Location of job
-        :param days: Posted in last x days
-        :param keywords: Filter jobs that have these keywords in the title/description
-        :return: xlsx file of jobs that fit the criteria
-        """
 
         page_number = 0
 

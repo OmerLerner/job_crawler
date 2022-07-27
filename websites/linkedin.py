@@ -9,14 +9,13 @@ from selenium.webdriver.support import expected_conditions as EC
 from websites.parser import Parser
 
 
-class Linkedin_parser(Parser):
+class linkedin_Parser(Parser):
     def __init__(self, job_title, location, range, keywords):
         super().__init__(job_title, location, range, keywords)
         self.website_name = "Linkedin"
         self.JOBS_PER_PAGE = 25
 
-
-    def parse_page_count(self,element, days_range):
+    def parse_page_count(self, element, days_range):
         labels = element.select("label")
         if days_range <= 1:
             value = labels[0].text
@@ -28,8 +27,7 @@ class Linkedin_parser(Parser):
             value = labels[3].text
         return int(value[value.find('(') + 1:value.find(')')])
 
-
-    def generate_range(self,days):
+    def generate_range(self, days):
         if days == 1:
             return "f_TPR=r86400&"
         elif days <= 7:
@@ -37,7 +35,6 @@ class Linkedin_parser(Parser):
         elif days <= 31:
             return "f_TPR=r2592000&"
         return ""
-
 
     def generate_job_title_string(self):
         keywords = self.job_title.split()
@@ -48,17 +45,8 @@ class Linkedin_parser(Parser):
             formatted_title += keywords[i] + "%20"
         return formatted_title + keywords[-1]
 
-
     def generate_url(self):
-        """
-        Sends a get request, parses page and returns all of the job postings on current page
 
-        :param job_title: String - name of job to search
-        :param location: String - location of job
-        :param days_range: Int - search jobs posted in last x days
-        :param page_number: Int - current page number to load
-        :return: Page containing all jobs
-        """
         date_posted_range = self.generate_range(self.range)
         url = ('https://www.linkedin.com/jobs/search/?'
                + date_posted_range +
@@ -66,11 +54,7 @@ class Linkedin_parser(Parser):
                + self.generate_job_title_string() +
                '&location=' + self.location)
 
-        # if page_number > 1:
-        #     url += "&start=" + str(25 * (page_number - 1))
-
         return url
-
 
     def parse_jobs_list_and_page_count(self, driver):
         count = int(driver.find_element(By.CSS_SELECTOR, "h1>span").get_attribute('innerText'))
@@ -86,55 +70,46 @@ class Linkedin_parser(Parser):
 
         return jobs, page_count
 
-
-    def parse_job_title(self,element):
+    def parse_job_title(self, element):
         try:
             title = element.find_element(By.CLASS_NAME, 'base-search-card__title').text
         except:
             title = ""
         return title
 
-
-    def parse_job_company(self,element):
+    def parse_job_company(self, element):
         try:
             company = element.find_element(By.CLASS_NAME, 'base-search-card__subtitle').text
         except:
             company = ""
         return company
 
-    def parse_job_location(self,element):
+    def parse_job_location(self, element):
         try:
-            location = element.find_element(By.CLASS_NAME,'job-search-card__location').text
+            location = element.find_element(By.CLASS_NAME, 'job-search-card__location').text
         except:
             location = ""
         return location
 
-
-    def parse_job_link(self,element):
+    def parse_job_link(self, element):
         try:
             link = element.find_element(By.CLASS_NAME, 'base-card__full-link').get_attribute('href')
         except:
             link = ''
         return link
 
-
-    def is_relevant(self,job_description):
+    def is_relevant(self, job_description):
         for keyword in self.keywords:
             if keyword in job_description:
                 return keyword
         return ""
 
-
-
-
     # Linkedin has 25 postings per page
-    # Add location of job
     def extract_jobs(self):
         """
         Returns all relevant jobs that fit the given parameters
         :return: xlsx file of jobs that fit the criteria
         """
-
 
         url = self.generate_url()
 
@@ -161,7 +136,7 @@ class Linkedin_parser(Parser):
                     self.add_job(job, keyword)
 
             except:
-                print("Timeout: "+self.parse_job_title(job)+" - Job description didn't load")
+                print("Timeout: " + self.parse_job_title(job) + " - Job description didn't load")
                 self.add_job(job, "TIMEOUT")
 
         driver.quit()
@@ -170,4 +145,3 @@ class Linkedin_parser(Parser):
             print("Linkedin - No jobs with the selected keywords were found.")
         else:
             self.create_table()
-
