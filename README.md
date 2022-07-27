@@ -21,7 +21,7 @@ Example: keywords = ['Python', 'Remote', 'AWS']
 
 * Selenium will run Chrome in the background. Don't be alarmed, this is completely normal!
 
-* Linkedin sometimes doesn't load the job description. If enough time has passed, it will save the listing to the xlsx, and define the keyword as TIMEOUT.
+* Linkedin sometimes doesn't load the job description. In order to prevent the script from not completing, if enough time has passed, it will save the listing to the xlsx, and define the keyword as TIMEOUT.
 
 ## To-do
 
