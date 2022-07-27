@@ -6,7 +6,9 @@ Want to automate your job search? Look no further! My job crawler is simple to u
 ## How to use:
 
 1.) Enter crawler.py
+
 2.) Change job_title and location
+
 3.) In "keywords", write all of the keywords that are relevant to your position. The crawler will filter out jobs that don't have these criteria in the job description.
 
 Example: keywords = ['Python', 'Remote', 'AWS']
