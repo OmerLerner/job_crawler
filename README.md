@@ -29,6 +29,8 @@ Example: keywords = ['Python', 'Remote', 'AWS']
 
 * Create a notebook to make the script easier to run
 
+* Linkedin - In pages with over 100 jobs, after scrolling down need to click on "More jobs" button if one exists
+
 ## Contact Me
 
 If you have any questions or opprotunities to send my way, I'm available at omerler@post.bgu.ac.il
