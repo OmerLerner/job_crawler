@@ -48,16 +48,11 @@ class indeed_Parser(Parser):
             link = ''
         return link
 
-    def is_relevant(self, job_url):
+    def get_job_description(self,job_url):
         page = requests.get(job_url)
         soup = BeautifulSoup(page.content, "html.parser")
+        return soup.text.lower()
 
-        key = ""
-        for keyword in self.keywords:
-            if keyword in soup.text.lower():
-                return keyword
-
-        return key
 
     def load_jobs(self, page_number):
         """
@@ -87,8 +82,9 @@ class indeed_Parser(Parser):
 
         print("Indeed - Parsing page 1 out of " + str(page_count))
         for job in jobs_list:
-            job_link = self.parse_job_link(job)
-            keyword = self.is_relevant(job_link)
+            job_url = self.parse_job_link(job)
+            job_description = self.get_job_description(job_url)
+            keyword = self.is_relevant(job_description)
             if keyword:
                 self.add_job(job, keyword)
 
@@ -98,8 +94,9 @@ class indeed_Parser(Parser):
             job_soup, page_count = self.load_jobs(page_number)
             jobs_list = job_soup.find_all('div', class_='cardOutline')
             for job in jobs_list:
-                job_link = self.parse_job_link(job)
-                keyword = self.is_relevant(job_link)
+                job_url = self.parse_job_link(job)
+                job_description = self.get_job_description(job_url)
+                keyword = self.is_relevant(job_description)
                 if keyword:
                     self.add_job(job, keyword)
 

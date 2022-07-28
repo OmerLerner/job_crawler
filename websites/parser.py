@@ -38,6 +38,13 @@ class Parser:
     def parse_job_location(self, job):
         pass
 
+    def is_relevant(self, job_description):
+        job_description = job_description.split()
+        for keyword in self.keywords:
+            if keyword in job_description:
+                return keyword
+        return ""
+
     def add_job(self, job, keyword):
         self.titles.append(self.parse_job_title(job))
         self.companies.append(self.parse_job_company(job))

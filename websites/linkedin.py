@@ -98,11 +98,6 @@ class linkedin_Parser(Parser):
             link = ''
         return link
 
-    def is_relevant(self, job_description):
-        for keyword in self.keywords:
-            if keyword in job_description:
-                return keyword
-        return ""
 
     # Linkedin has 25 postings per page
     def extract_jobs(self):
