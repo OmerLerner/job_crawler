@@ -7,7 +7,7 @@ Want to automate your job search? Look no further! My job crawler is simple to u
 
 1.) Enter crawler.py
 
-2.) Change job_title and location
+2.) Change job_title, location and days (job posted in last x days).
 
 3.) In "keywords", write all of the keywords that are relevant to your position. The crawler will filter out jobs that don't have these criteria in the job description.
 
@@ -21,13 +21,15 @@ Example: keywords = ['Python', 'Remote', 'AWS']
 
 * Selenium will run Chrome in the background. Don't be alarmed, this is completely normal!
 
-* Linkedin sometimes doesn't load the job description. If enough time has passed, it will save the listing to the xlsx, and define the keyword as TIMEOUT.
+* Linkedin sometimes doesn't load the job description. In order to prevent the script from not completing, if enough time has passed, it will save the listing to the xlsx, and define the keyword as TIMEOUT.
 
 ## To-do
 
 * Add additional websites (open to requests)
 
 * Create a notebook to make the script easier to run
+
+* Linkedin - In pages with over 100 jobs, after scrolling down need to click on "More jobs" button if one exists
 
 ## Contact Me
 
