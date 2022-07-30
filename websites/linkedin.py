@@ -2,7 +2,8 @@ import math
 import time
 
 from selenium import webdriver
-from selenium.common import TimeoutException, ElementClickInterceptedException
+from selenium.common import TimeoutException, ElementClickInterceptedException, ElementNotSelectableException, \
+    ElementNotInteractableException
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
@@ -15,6 +16,7 @@ class linkedin_Parser(Parser):
         super().__init__(job_title, location, range, keywords)
         self.website_name = "Linkedin"
         self.JOBS_PER_PAGE = 25
+        self.TIMEOUT_SECONDS = 10
 
     def parse_page_count(self, element, days_range):
         labels = element.select("label")
@@ -66,18 +68,25 @@ class linkedin_Parser(Parser):
         :param driver: Chrome WebDriver that Selenium uses
         :return: A list of all of the job elements
         """
-        count = driver.find_element(By.CSS_SELECTOR, "h1>span").get_attribute('innerText')
+        count = 0
+
+        try:
+            count = WebDriverWait(driver,3).until(EC.element_to_be_clickable((
+                By.CSS_SELECTOR,"h1>span"))).get_attribute('innerText')
+        except TimeoutException:
+            print("Timeout error OR too many requests sent to Linkedin. Please try again in a few minutes.")
+            exit(-1)
+
         if len(count) > 5:
-            count = 1000
-            page_count = count
+            page_count = 55
         else:
             count = int(count)
             page_count = math.ceil(count / self.JOBS_PER_PAGE)
 
         timeout_count = 0
 
-        #Sometimes the "show more" button doesn't work right away, added more margin for error by adding 5 iterations
-        for i in range(page_count+5):
+        # Sometimes the "show more" button doesn't work right away, added more margin for error by adding 5 iterations
+        for i in range(page_count + 5):
             driver.execute_script("window.scrollTo(0,document.body.scrollHeight)")
             try:
                 infinite_button = WebDriverWait(driver, 1).until(EC.element_to_be_clickable((
@@ -85,16 +94,14 @@ class linkedin_Parser(Parser):
                 )))
                 if infinite_button:
                     infinite_button.click()
-                    infinite_button.click()
-                    time.sleep(1)
-            except TimeoutException:
-                timeout_count += 1
-                if timeout_count > 15 or i * self.JOBS_PER_PAGE > 999:
-                    break
-                driver.execute_script("window.scrollTo(0,0)")
-            except ElementClickInterceptedException:
-                break
+                    time.sleep(0.4)
 
+            except (TimeoutException,ElementClickInterceptedException):
+                timeout_count += 1
+                if timeout_count > 10 or i * self.JOBS_PER_PAGE > 999:
+                    break
+
+        driver.execute_script("window.scrollTo(0,0)")
         jobs_list = driver.find_element(By.CLASS_NAME, 'jobs-search__results-list')
         jobs = jobs_list.find_elements(By.TAG_NAME, 'li')
 
@@ -128,30 +135,45 @@ class linkedin_Parser(Parser):
             link = ''
         return link
 
-    def handle_timeout_link(self,timeout_job,driver):
+    def add_timeout_job(self,url,job_title,company,location,keyword):
+        self.titles.append(job_title)
+        self.companies.append(company)
+        self.links.append(url)
+        self.locations.append(location)
+        self.relevant_keyword.append(keyword)
+
+    def handle_timeout_link(self, timeout_job, driver):
         """
         Second check for jobs that timed out during the first iteration. Load each page
         individually and try to parse the job information. If unsuccessful, adds the job
         anyways with the keyword TIMEOUT
 
-        :param timeout_job: List- index 0: job element, index 1: job url
+        :param timeout_job: List- index 0: job url, 1: job title, 2: job company, 3: job location
         :param driver: chromedriver
         :return: void
         """
-        driver.get(timeout_job[0])
         try:
-            button = WebDriverWait(driver, 3).until(
+            driver.get(timeout_job[0])
+            button = WebDriverWait(driver, 1).until(
                 EC.element_to_be_clickable((By.CLASS_NAME, "show-more-less-html__button--more")))
             button.click()
-            time.sleep(0.5)
             job_description = driver.find_element(By.CLASS_NAME, "show-more-less-html").text
             keyword = self.is_relevant(job_description.lower())
             if keyword:
-                self.add_job(timeout_job[1], keyword)
+                self.add_timeout_job(timeout_job[0],
+                                     timeout_job[1],
+                                     timeout_job[2],
+                                     timeout_job[3],
+                                     keyword)
         except:
-            print("Timeout: " + self.parse_job_title(timeout_job[0]) + " - Job description didn't load")
-            self.add_job(timeout_job[0], "TIMEOUT")
-            return
+            print("Timeout: " + timeout_job[1] + " - Job description didn't load")
+            self.add_timeout_job(timeout_job[0],
+                                 timeout_job[1],
+                                 timeout_job[2],
+                                 timeout_job[3],
+                                 "TIMEOUT")
+            time.sleep(3)
+
 
     # Linkedin has 25 postings per page
     def extract_jobs(self):
@@ -177,19 +199,21 @@ class linkedin_Parser(Parser):
             job.click()
 
             try:
-                button = WebDriverWait(driver, 3).until(
+                button = WebDriverWait(driver, 1).until(
                     EC.element_to_be_clickable((By.CLASS_NAME, "show-more-less-html__button--more")))
                 button.click()
 
-                time.sleep(0.5)
                 job_description = driver.find_element(By.CLASS_NAME, "show-more-less-html").text
                 keyword = self.is_relevant(job_description.lower())
                 if keyword:
                     self.add_job(job, keyword)
 
             except:
-                timeout_jobs.append([self.parse_job_link(job),job])
-
+                timeout_jobs.append([self.parse_job_link(job),
+                                     self.parse_job_title(job),
+                                     self.parse_job_company(job),
+                                     self.parse_job_location(job)])
+            time.sleep(1.5)
 
         for timeout_job in timeout_jobs:
             self.handle_timeout_link(timeout_job, driver)
