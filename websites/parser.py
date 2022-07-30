@@ -39,6 +39,8 @@ class Parser:
         pass
 
     def is_relevant(self, job_description):
+        if job_description == "":
+            print("I am empty!")
         job_description = job_description.split()
         for keyword in self.keywords:
             if keyword in job_description:
@@ -76,8 +78,8 @@ class Parser:
 
         writer = pd.ExcelWriter('results-' +
                                 self.website_name.lower() + "-" +
-                                self.job_title.replace(" ", "_") + '-' +
-                                str(date.today()).replace(" ", "_") + '.xlsx')
+                                self.job_title.replace(" ", "-").lower() + '-' +
+                                str(date.today()).replace(" ", "-") + '.xlsx')
         df.to_excel(writer, sheet_name=self.website_name + ' Jobs', index=False, na_rep='NaN')
 
         for column in df:
@@ -90,4 +92,7 @@ class Parser:
 
         writer.save()
 
-        print(self.website_name + " - Done! Results saved into results-" + self.website_name.lower() + ".xlsx")
+        print(self.website_name + " - Done! Results saved into results-" +
+              self.website_name.lower() + "-" +
+              self.job_title.replace(" ", "-").lower() + '-' +
+              str(date.today()).replace(" ", "-") + ".xlsx")
