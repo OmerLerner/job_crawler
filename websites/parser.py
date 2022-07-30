@@ -39,8 +39,6 @@ class Parser:
         pass
 
     def is_relevant(self, job_description):
-        if job_description == "":
-            print("I am empty!")
         job_description = job_description.split()
         for keyword in self.keywords:
             if keyword in job_description:
