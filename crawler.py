@@ -12,10 +12,10 @@ def check_validity(job_title, location, days, keywords):
 
 
 def main():
-    job_title = "student"
-    location = "israel"
-    days = 1
-    keywords = ['computer science']
+    job_title = ""
+    location = ""
+    days = 0
+    keywords = []
 
     values = []
 
