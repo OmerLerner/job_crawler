@@ -39,10 +39,14 @@ class Parser:
         pass
 
     def is_relevant(self, job_description):
-        job_description = job_description.split()
+        job_description_array = job_description.split()
         for keyword in self.keywords:
-            if keyword in job_description:
-                return keyword
+            if ' ' in keyword:
+                if keyword in job_description:
+                    return keyword
+            else:
+                if keyword in job_description_array:
+                    return keyword
         return ""
 
     def add_job(self, job, keyword):
