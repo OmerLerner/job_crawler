@@ -32,10 +32,10 @@ Example: keywords = ['Python', 'Remote', 'AWS']
   * During the first iteration of all jobs, I use Selenium's wait methods and sleep() to simulate pauses in between requests. If there is a timeout:
     * The job will be appended to the "timeout_jobs", and we'll load it later
     * Waiting too little will result the next "get" to receive this error as well.
-  * After we iterate through all the jobs, approximately 15% should be in the time_out list. We iterate through them again, but with higher wait times.
+  * After we iterate through all the jobs, approximately 10-20% should be in the time_out list. We iterate through them again, but with higher wait times.
   * If this fails too (429 errors, not logged on to LinkedIn), it will be added to the list, with the "TIMEOUT" keyword.
 
-This solution parses 99% of the jobs correctly, while 1% will be saved with "TIME OUT" as the keyword.
+This solution parses 99% of the jobs correctly, while 1% will be saved with "TIME OUT" as the keyword, without sacrificing runtime of the script.
 
 ## To-do
 
