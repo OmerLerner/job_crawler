@@ -5,6 +5,10 @@ Want to automate your job search? Look no further! My job crawler is simple to u
 
 ## How to use:
 
+You can use crawler.exe and follow the instructions. Make sure chromedriver.exe and parameters.txt (After it's created) are in the same folder before running!
+
+In addition, you can run the code yourself using the following instructions:
+
 0.) Requirements: Python3, BeautifulSoup, Selenium, Pandas
 
 1.) Enter crawler.py
@@ -41,7 +45,7 @@ This solution parses 99% of the jobs correctly, while 1% will be saved with "TIM
 
 * Add additional websites (open to requests)
 
-* Create a notebook to make the script easier to run
+* **DONE** Created exe file to run the script
 
 * **DONE** Linkedin - In pages with over 100 jobs, after scrolling down need to click on "More jobs" button if one exists
 
