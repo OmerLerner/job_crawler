@@ -1,6 +1,8 @@
 # Ultimate Job Crawler
 
-Want to automate your job search? Look no further! My job crawler is simple to use, just download the script, modify a few variables, and you're good to go!
+Want to automate your job search? Look no further! My job crawler is simple to use, run the exe or the script, modify a few values, and you're good to go!
+
+Currently supports: Linkedin, Indeed
 
 
 ## How to use:
