@@ -5,6 +5,8 @@ Want to automate your job search? Look no further! My job crawler is simple to u
 
 ## How to use:
 
+0.) Requirements: Python3, BeautifulSoup, Selenium, Pandas
+
 1.) Enter crawler.py
 
 2.) 
