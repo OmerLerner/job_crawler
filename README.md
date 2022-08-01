@@ -5,7 +5,26 @@ Want to automate your job search? Look no further! My job crawler is simple to u
 
 ## How to use:
 
-You can use crawler.exe and follow the instructions. Make sure chromedriver.exe and parameters.txt (After it's created) are in the same folder before running!
+Option 1:
+
+Extract crawler.rar and run crawler.exe. 
+
+0.) On the first time you run it, write 1 and follow the instructions.
+
+1.) You will be required to write the job name, job location, days (job posted in last x days) and keywords to search for.
+    
+    Example input:
+    Job name = Student
+    Job location = New York
+    Days = 7
+    Keywords = Python,Computer Science,Machine Learning
+
+2.) The script will then run, and save the xlsx files in the same director as crawler.exe
+
+3.) The next time you run the exe, you can write 0 to use the same values, or 1 to write new values.
+ 
+
+Option 2:
 
 In addition, you can run the code yourself using the following instructions:
 
@@ -17,14 +36,18 @@ In addition, you can run the code yourself using the following instructions:
 
     a.) In crawler.py, change job_title, location, days (job posted in last x days) and keywords.
 
-    b.) You can also write these inputs in the cmd
+    b.) You can also write these inputs in the cmd by choosing option 1 when the script runs. These inputs will be saved into a file
 
 
 3.) In "keywords", write all the keywords that are relevant to your position. The crawler will filter out jobs that don't have these criteria in the job description.
 
 Example: keywords = ['Python', 'Remote', 'AWS']
 
-4.) Make sure you have the required dependencies, and run the script! When prompted, inputting 0 will use the data in crawler.py, 1 will allow you to write it in the cmd.
+4.) Make sure you have the required dependencies, and run the script! When prompted:
+
+    0 - Use the data in parameters.txt
+    1 - Input new data in the CMD
+    2 - Use data stored in the variables in crawler.py
 
 ## Features & Notes
 
