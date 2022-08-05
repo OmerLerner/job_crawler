@@ -7,9 +7,9 @@ Currently supports: Linkedin, Indeed
 
 ## How to use: ##
 
-###You have two options: Run the exe file, or run the script directly from your desired cmd ###
+### You have two options: Run the exe file, or run the script directly from your desired cmd ###
 
-####Option 1: Run by exe ####
+#### Option 1: Run by exe ####
 
 Extract crawler.rar and run crawler.exe.  Make sure chromedriver.exe is in the same folder as crawler.exe
 
