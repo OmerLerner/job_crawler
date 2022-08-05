@@ -7,9 +7,11 @@ Currently supports: Linkedin, Indeed
 
 ## How to use:
 
-Option 1:
+###You have two options: Run the exe file, or run the script directly from your desired cmd
 
-Extract crawler.rar and run crawler.exe. 
+####Option 1: Run by exe
+
+Extract crawler.rar and run crawler.exe.  Make sure chromedriver.exe is in the same folder as crawler.exe
 
 0.) On the first time you run it, write 1 and follow the instructions.
 
@@ -21,18 +23,18 @@ Extract crawler.rar and run crawler.exe.
     Days = 7
     Keywords = Python,Computer Science,Machine Learning
 
-2.) The script will then run, and save the xlsx files in the same director as crawler.exe
+2.) The script will then run, and save the xlsx files in the same directory as crawler.exe
 
 3.) The next time you run the exe, you can write 0 to use the same values, or 1 to write new values.
  
 
-Option 2:
+####Option 2: Run from CMD
 
 In addition, you can run the code yourself using the following instructions:
 
 0.) Requirements: Python3, BeautifulSoup, Selenium, Pandas
 
-1.) Enter crawler.py
+1.) Run crawler.py
 
 2.) 
 
@@ -50,6 +52,12 @@ Example: keywords = ['Python', 'Remote', 'AWS']
     0 - Use the data in parameters.txt
     1 - Input new data in the CMD
     2 - Use data stored in the variables in crawler.py
+
+####Command line arguments:
+##### -f : Runs the script directly, using the parameters saved in parameters.txt
+##### -l : Parses jobs ONLY from Linkedin
+##### -i : Parses jobs ONLY from Indeed
+If you use both -l and -i, it will parse from both websites.
 
 ## Features & Notes
 
