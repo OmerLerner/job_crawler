@@ -7,9 +7,9 @@ Currently supports: Linkedin, Indeed
 
 ## How to use: ##
 
-###You have two options: Run the exe file, or run the script directly from your desired cmd ###
+### You have two options: Run the exe file, or run the script directly from your desired cmd ###
 
-####Option 1: Run by exe ####
+#### Option 1: Run by exe ####
 
 Extract crawler.rar and run crawler.exe.  Make sure chromedriver.exe is in the same folder as crawler.exe
 
@@ -28,7 +28,7 @@ Extract crawler.rar and run crawler.exe.  Make sure chromedriver.exe is in the s
 3.) The next time you run the exe, you can write 0 to use the same values, or 1 to write new values.
  
 
-####Option 2: Run from CMD ####
+#### Option 2: Run from CMD ####
 
 In addition, you can run the code yourself using the following instructions:
 
@@ -53,7 +53,7 @@ Example: keywords = ['Python', 'Remote', 'AWS']
     1 - Input new data in the CMD
     2 - Use data stored in the variables in crawler.py
 
-####Command line arguments: ####
+#### Command line arguments: ####
 ##### -f : Runs the script directly, using the parameters saved in parameters.txt #####
 ##### -l : Parses jobs ONLY from Linkedin #####
 ##### -i : Parses jobs ONLY from Indeed #####
