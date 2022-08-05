@@ -1,15 +1,15 @@
-# Ultimate Job Crawler
+# Ultimate Job Crawler #
 
 Want to automate your job search? Look no further! My job crawler is simple to use, run the exe or the script, modify a few values, and you're good to go!
 
 Currently supports: Linkedin, Indeed
 
 
-## How to use:
+## How to use: ##
 
-###You have two options: Run the exe file, or run the script directly from your desired cmd
+###You have two options: Run the exe file, or run the script directly from your desired cmd ###
 
-####Option 1: Run by exe
+####Option 1: Run by exe ####
 
 Extract crawler.rar and run crawler.exe.  Make sure chromedriver.exe is in the same folder as crawler.exe
 
@@ -28,7 +28,7 @@ Extract crawler.rar and run crawler.exe.  Make sure chromedriver.exe is in the s
 3.) The next time you run the exe, you can write 0 to use the same values, or 1 to write new values.
  
 
-####Option 2: Run from CMD
+####Option 2: Run from CMD ####
 
 In addition, you can run the code yourself using the following instructions:
 
@@ -53,13 +53,13 @@ Example: keywords = ['Python', 'Remote', 'AWS']
     1 - Input new data in the CMD
     2 - Use data stored in the variables in crawler.py
 
-####Command line arguments:
-##### -f : Runs the script directly, using the parameters saved in parameters.txt
-##### -l : Parses jobs ONLY from Linkedin
-##### -i : Parses jobs ONLY from Indeed
+####Command line arguments: ####
+##### -f : Runs the script directly, using the parameters saved in parameters.txt #####
+##### -l : Parses jobs ONLY from Linkedin #####
+##### -i : Parses jobs ONLY from Indeed #####
 If you use both -l and -i, it will parse from both websites.
 
-## Features & Notes
+## Features & Notes ##
 
 * The xlsx sheet will have 5 columns: Job title, job location, company name, relevant keyword (the first one that's found) and the url to the job listing
 
@@ -74,7 +74,7 @@ If you use both -l and -i, it will parse from both websites.
 
 This solution parses 99% of the jobs correctly, while 1% will be saved with "TIME OUT" as the keyword, without sacrificing runtime of the script.
 
-## To-do
+## To-do ##
 
 * Add additional websites (open to requests)
 
@@ -82,6 +82,6 @@ This solution parses 99% of the jobs correctly, while 1% will be saved with "TIM
 
 * **DONE** Linkedin - In pages with over 100 jobs, after scrolling down need to click on "More jobs" button if one exists
 
-## Contact Me
+## Contact Me ##
 
 If you have any questions or opportunities to send my way, I'm available at omerler@post.bgu.ac.il
